@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAME LIST | Чёрный список</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* ХЕДЕР */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #ff0000;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #ff0000, #ff3333);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .auth-section {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .admin-btn, .guest-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .admin-btn {
+            background: #ff0000;
+            color: white;
+        }
+
+        .admin-btn:hover {
+            background: #cc0000;
+            transform: scale(1.05);
+        }
+
+        .guest-btn {
+            background: #333;
+            color: #ccc;
+        }
+
+        .guest-btn:hover {
+            background: #444;
+        }
+
+        /* ПОИСК */
+        .search-box {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 50px;
+        }
+
+        .search-input {
+            width: 60%;
+            padding: 15px 25px;
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #ff0000;
+        }
+
+        /* КАТЕГОРИИ */
+        .categories {
+            display: flex;
+            flex-direction: column;
+            gap: 60px;
+        }
+
+        .category {
+            background: #111;
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid;
+        }
+
+        .category-title {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+        }
+
+        /* КАРТОЧКИ */
+        .card {
+            background: #1a1a1a;
+            border-radius: 10px;
+            width: 280px;
+            padding: 20px;
+            border: 1px solid #333;
+            transition: all 0.3s;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(255, 0, 0, 0.1);
+        }
+
+        .avatar-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        /* КНОПКА УДАЛЕНИЯ НА АВАТАРЕ */
+        .delete-avatar-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: rgba(255, 0, 0, 0.9);
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            display: none;
+            z-index: 100;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .delete-avatar-btn:hover {
+            background: #ff0000;
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+        }
+
+        .avatar-section:hover .delete-avatar-btn {
+            display: block;
+        }
+
+        .nickname {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .fame-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .description {
+            color: #aaa;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-top: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ */
+        .confirm-delete-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+
+        .confirm-delete-content {
+            background: #111;
+            padding: 40px;
+            border-radius: 15px;
+            border: 3px solid #ff0000;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .confirm-delete-content h2 {
+            color: #ff0000;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .confirm-delete-content p {
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+            line-height: 1.5;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .confirm-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            min-width: 120px;
+        }
+
+        .confirm-delete {
+            background: #ff0000;
+            color: white;
+        }
+
+        .confirm-delete:hover {
+            background: #cc0000;
+            transform: scale(1.05);
+        }
+
+        .confirm-cancel {
+            background: #333;
+            color: white;
+        }
+
+        .confirm-cancel:hover {
+            background: #444;
+        }
+
+        /* МОДАЛЬНОЕ ОКНО ПРОФИЛЯ */
+        .profile-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .profile-content {
+            background: #111;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 20px;
+            border: 3px solid;
+            padding: 40px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .profile-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #ff0000;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid;
+            position: relative;
+        }
+
+        .profile-avatar-container {
+            position: relative;
+        }
+
+        .profile-delete-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ff0000;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: none;
+            z-index: 10;
+            font-weight: bold;
+        }
+
+        .profile-avatar-container:hover .profile-delete-btn {
+            display: block;
+        }
+
+        .profile-info h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .profile-fame {
+            font-size: 1.2rem;
+            padding: 8px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .profile-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .detail-card {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #ff0000;
+        }
+
+        .detail-title {
+            color: #ff0000;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .detail-content {
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .project-link {
+            color: #00a8ff;
+            text-decoration: none;
+            word-break: break-all;
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: rgba(0, 168, 255, 0.1);
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .project-link:hover {
+            background: rgba(0, 168, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        /* ЦВЕТА ДЛЯ КАТЕГОРИЙ */
+        .creator-category {
+            border-left-color: #ff0000;
+        }
+        .creator-category .category-title {
+            color: #ff0000;
+            border-bottom-color: #ff0000;
+        }
+        .creator-category .avatar {
+            border-color: #ff0000;
+        }
+        .creator-category .fame-badge {
+            background: #ff0000;
+            color: white;
+        }
+
+        .high-category {
+            border-left-color: #ff9900;
+        }
+        .high-category .category-title {
+            color: #ff9900;
+            border-bottom-color: #ff9900;
+        }
+        .high-category .avatar {
+            border-color: #ff9900;
+        }
+        .high-category .fame-badge {
+            background: #ff9900;
+            color: black;
+        }
+
+        .medium-category {
+            border-left-color: #ffff00;
+        }
+        .medium-category .category-title {
+            color: #ffff00;
+            border-bottom-color: #ffff00;
+        }
+        .medium-category .avatar {
+            border-color: #ffff00;
+        }
+        .medium-category .fame-badge {
+            background: #ffff00;
+            color: black;
+        }
+
+        .low-category {
+            border-left-color: #00ff00;
+        }
+        .low-category .category-title {
+            color: #00ff00;
+            border-bottom-color: #00ff00;
+        }
+        .low-category .avatar {
+            border-color: #00ff00;
+        }
+        .low-category .fame-badge {
+            background: #00ff00;
+            color: black;
+        }
+
+        /* АДМИН ПАНЕЛЬ */
+        .admin-panel {
+            background: rgba(0, 0, 0, 0.95);
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 600px;
+            padding: 40px;
+            border-radius: 15px;
+            border: 3px solid #ff0000;
+            display: none;
+            z-index: 1000;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .admin-form input, .admin-form select, .admin-form textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: white;
+        }
+
+        .avatar-upload {
+            padding: 15px;
+            background: #333;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+            text-align: center;
+            border: 2px dashed #666;
+        }
+
+        .close-admin {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff0000;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .add-btn {
+            background: #ff0000;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            font-size: 1.1rem;
+        }
+
+        .admin-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff0000;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            display: none;
+            z-index: 999;
+            animation: pulse 2s infinite;
+        }
+
+        .github-corner {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .github-link {
+            background: #24292e;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .github-link:hover {
+            background: #444;
+            transform: scale(1.05);
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+        }
+
+        /* СКРОЛЛБАР */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #111;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ff0000;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #cc0000;
+        }
+
+        /* ЭКСПОРТ/ИМПОРТ ПАНЕЛЬ */
+        .data-panel {
+            background: rgba(0, 0, 0, 0.95);
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 600px;
+            padding: 40px;
+            border-radius: 15px;
+            border: 3px solid #00ff00;
+            display: none;
+            z-index: 1000;
+        }
+
+        .data-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .data-btn {
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .export-btn {
+            background: #00a8ff;
+            color: white;
+        }
+
+        .import-btn {
+            background: #00ff00;
+            color: black;
+        }
+
+        .github-btn {
+            background: #24292e;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- СТАТУС АДМИНА -->
+    <div class="admin-status" id="adminStatus">👑 АДМИН РЕЖИМ</div>
+
+    <div class="container">
+        <!-- ХЕДЕР -->
+        <div class="header">
+            <div class="logo">FAME LIST</div>
+            <div class="auth-section">
+                <button class="guest-btn" onclick="loginAsGuest()">Гость</button>
+                <button class="admin-btn" onclick="openAdminPanel()">Админ</button>
+                <button class="guest-btn" onclick="openDataPanel()">⚙️ Данные</button>
+            </div>
+        </div>
+
+        <!-- ПОИСК -->
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="Поиск по никам..." oninput="searchProfiles(this.value)">
+        </div>
+
+        <!-- КАТЕГОРИИ -->
+        <div class="categories">
+            <!-- СОЗДАТЕЛЬ -->
+            <div class="category creator-category">
+                <div class="category-title">👑 СОЗДАТЕЛЬ</div>
+                <div class="cards-container" id="creator-cards"></div>
+            </div>
+
+            <!-- ВЫСОКИЙ ФЕЙМ -->
+            <div class="category high-category">
+                <div class="category-title">🔥 ВЫСОКИЙ ФЕЙМ</div>
+                <div class="cards-container" id="high-cards"></div>
+            </div>
+
+            <!-- СРЕДНИЙ ФЕЙМ -->
+            <div class="category medium-category">
+                <div class="category-title">⚠️ СРЕДНИЙ ФЕЙМ</div>
+                <div class="cards-container" id="medium-cards"></div>
+            </div>
+
+            <!-- МАЛЫЙ ФЕЙМ -->
+            <div class="category low-category">
+                <div class="category-title">💩 МАЛЫЙ ФЕЙМ</div>
+                <div class="cards-container" id="low-cards"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ -->
+    <div class="confirm-delete-modal" id="confirmDeleteModal">
+        <div class="confirm-delete-content">
+            <h2>🗑️ УДАЛИТЬ ПРОФИЛЬ</h2>
+            <p id="deleteMessage">Вы точно хотите удалить этого пидораса?</p>
+            <div class="confirm-buttons">
+                <button class="confirm-btn confirm-delete" onclick="confirmDelete()">ДА, УДАЛИТЬ НАХУЙ</button>
+                <button class="confirm-btn confirm-cancel" onclick="cancelDelete()">НЕТ, ОСТАВИТЬ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО ПРОФИЛЯ -->
+    <div class="profile-modal" id="profileModal">
+        <div class="profile-content" id="profileContent">
+            <!-- Контент профиля будет добавляться через JS -->
+        </div>
+    </div>
+
+    <!-- АДМИН ПАНЕЛЬ -->
+    <div class="admin-panel" id="adminPanel">
+        <button class="close-admin" onclick="closeAdminPanel()">✕</button>
+        <h2>👑 АДМИН ПАНЕЛЬ</h2>
+        <div class="admin-form">
+            <input type="text" id="nickname" placeholder="Никнейм *" required>
+            <select id="fameType">
+                <option value="creator">Создатель</option>
+                <option value="high">Высокий фейм</option>
+                <option value="medium">Средний фейм</option>
+                <option value="low">Малый фейм</option>
+            </select>
+            <textarea id="description" placeholder="Описание" rows="4"></textarea>
+            <input type="text" id="project" placeholder="Ссылка на проект (https://...)">
+            <input type="number" id="year" placeholder="Год вступления в комьюнити" min="2000" max="2024">
+            
+            <div class="avatar-upload" onclick="document.getElementById('avatarInput').click()">
+                📁 НАЖМИ ЧТОБЫ ЗАГРУЗИТЬ АВАТАР
+            </div>
+            <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="previewAvatar(event)">
+            <div id="avatarPreview" style="width:100px;height:100px;border-radius:50%;border:2px solid #ff0000;margin:10px auto;background:#222;display:none;"></div>
+            
+            <button class="add-btn" onclick="addToFameList()">ДОБАВИТЬ В ФЕЙМ ЛИСТ</button>
+        </div>
+    </div>
+
+    <!-- ПАНЕЛЬ ЭКСПОРТА/ИМПОРТА -->
+    <div class="data-panel" id="dataPanel">
+        <button class="close-admin" onclick="closeDataPanel()" style="background:#00ff00;color:black">✕</button>
+        <h2 style="color:#00ff00">⚙️ УПРАВЛЕНИЕ ДАННЫМИ</h2>
+        <div class="data-buttons">
+            <button class="data-btn export-btn" onclick="exportData()">
+                📥 ЭКСПОРТ ДАННЫХ (JSON файл)
+            </button>
+            <button class="data-btn import-btn" onclick="document.getElementById('importFile').click()">
+                📤 ИМПОРТ ДАННЫХ
+            </button>
+            <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+            <button class="data-btn" onclick="backupToGitHub()" style="background:#ff9900;color:black">
+                💾 СОХРАНИТЬ В GITHUB
+            </button>
+            <button class="data-btn github-btn" onclick="window.open('https://github.com', '_blank')">
+                🐙 ОТКРЫТЬ GITHUB
+            </button>
+            <button class="data-btn" onclick="showBackupInfo()" style="background:#666;color:white">
+                ℹ️ КАК ПЕРЕНЕСТИ НА GITHUB
+            </button>
+        </div>
+    </div>
+
+    <!-- ССЫЛКА НА GITHUB -->
+    <div class="github-corner">
+        <a href="https://github.com" target="_blank" class="github-link">
+            <svg height="24" width="24" viewBox="0 0 16 16" fill="currentColor">
+                <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+            </svg>
+            GitHub
+        </a>
+    </div>
+
+    <script>
+        // =================== КОНФИГУРАЦИЯ GITHUB ===================
+        const GITHUB_USERNAME = "YOUR_USERNAME"; // Замени на свой GitHub username
+        const GITHUB_REPO = "fame-list"; // Название репозитория
+        const GITHUB_TOKEN = ""; // Оставь пустым для публичного репозитория
+
+        // =================== БАЗА ДАННЫХ ===================
+        let fameDB = JSON.parse(localStorage.getItem('fameDB')) || {
+            creator: [],
+            high: [],
+            medium: [],
+            low: []
+        };
+
+        // =================== НАСТРОЙКИ АДМИНА ===================
+        const ADMIN_PASS = "22518";
+        let isAdmin = false;
+        let profileToDelete = null;
+        let avatarBase64 = '';
+
+        // =================== ИНИЦИАЛИЗАЦИЯ ===================
+        function init() {
+            // Проверяем, есть ли данные в URL (для GitHub Pages)
+            const urlParams = new URLSearchParams(window.location.hash.substring(1));
+            const dataParam = urlParams.get('data');
+            
+            if (dataParam) {
+                try {
+                    const decodedData = atob(dataParam);
+                    const importedData = JSON.parse(decodedData);
+                    fameDB = importedData;
+                    localStorage.setItem('fameDB', JSON.stringify(fameDB));
+                    alert('✅ Данные загружены из URL!');
+                } catch(e) {
+                    console.log('Нет данных в URL или ошибка парсинга');
+                }
+            }
+            
+            loadAllProfiles();
+        }
+
+        // =================== РАБОТА С ДАННЫМИ ===================
+        function updateAdminStatus() {
+            document.getElementById('adminStatus').style.display = isAdmin ? 'block' : 'none';
+        }
+
+        function loadAllProfiles() {
+            ['creator', 'high', 'medium', 'low'].forEach(type => renderCategory(type));
+            updateAdminStatus();
+        }
+
+        function renderCategory(type) {
+            const container = document.getElementById(`${type}-cards`);
+            container.innerHTML = '';
+            
+            fameDB[type].forEach((person, index) => {
+                if (!person.id) person.id = `${type}_${Date.now()}_${index}`;
+                
+                const deleteBtn = isAdmin ? `
+                    <button class="delete-avatar-btn" 
+                            onclick="showDeleteConfirm('${person.id}', '${type}', '${person.nickname}')" 
+                            title="Удалить этого пидораса">
+                        ×
+                    </button>
+                ` : '';
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.id = person.id;
+                card.dataset.type = type;
+                
+                card.innerHTML = `
+                    <div class="avatar-section">
+                        <img src="${person.avatar || getDefaultAvatar(type)}" 
+                             class="avatar" 
+                             alt="Аватар"
+                             onerror="this.src='${getDefaultAvatar(type)}'">
+                        ${deleteBtn}
+                        <div class="nickname">${person.nickname}</div>
+                    </div>
+                    <div class="fame-badge">${getFameLabel(type)}</div>
+                    <div class="description">${person.description || 'Без описания'}</div>
+                `;
+                
+                card.onclick = (e) => {
+                    if (!e.target.classList.contains('delete-avatar-btn')) {
+                        openProfile(person, type);
+                    }
+                };
+                container.appendChild(card);
+            });
+            
+            localStorage.setItem('fameDB', JSON.stringify(fameDB));
+        }
+
+        function getDefaultAvatar(type) {
+            const avatars = {
+                'creator': 'https://api.dicebear.com/7.x/identicon/svg?seed=Creator&backgroundColor=ff0000',
+                'high': 'https://api.dicebear.com/7.x/identicon/svg?seed=High&backgroundColor=ff9900',
+                'medium': 'https://api.dicebear.com/7.x/identicon/svg?seed=Medium&backgroundColor=ffff00',
+                'low': 'https://api.dicebear.com/7.x/identicon/svg?seed=Low&backgroundColor=00ff00'
+            };
+            return avatars[type];
+        }
+
+        // =================== УДАЛЕНИЕ ===================
+        function showDeleteConfirm(id, type, nickname) {
+            if (!isAdmin) return alert('Только админ может удалять!');
+            
+            profileToDelete = { id, type };
+            const message = document.getElementById('deleteMessage');
+            message.innerHTML = `Удалить <strong style="color:#ff0000">${nickname}</strong> нахуй?<br><small style="color:#888">Нельзя отменить!</small>`;
+            document.getElementById('confirmDeleteModal').style.display = 'flex';
+        }
+
+        function confirmDelete() {
+            if (!profileToDelete) return;
+            
+            const { id, type } = profileToDelete;
+            fameDB[type] = fameDB[type].filter(p => p.id !== id);
+            localStorage.setItem('fameDB', JSON.stringify(fameDB));
+            
+            renderCategory(type);
+            closeAllModals();
+            alert('🗑️ Профиль удалён!');
+            profileToDelete = null;
+        }
+
+        function cancelDelete() {
+            profileToDelete = null;
+            document.getElementById('confirmDeleteModal').style.display = 'none';
+        }
+
+        // =================== ЭКСПОРТ/ИМПОРТ ===================
+        function exportData() {
+            const dataStr = JSON.stringify(fameDB, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `fame-list-backup-${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            alert('✅ Данные экспортированы в JSON файл!');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    // Проверяем структуру данных
+                    if (importedData.creator && importedData.high && importedData.medium && importedData.low) {
+                        fameDB = importedData;
+                        localStorage.setItem('fameDB', JSON.stringify(fameDB));
+                        loadAllProfiles();
+                        alert('✅ Данные успешно импортированы!');
+                    } else {
+                        throw new Error('Неверный формат файла');
+                    }
+                } catch(error) {
+                    alert('❌ Ошибка при импорте данных: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function backupToGitHub() {
+            const dataStr = JSON.stringify(fameDB, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            
+            // Создаем URL для скачивания
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fame-list-backup-${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('✅ Файл скачан! Загрузи его в GitHub:\n1. Создай репозиторий "fame-list"\n2. Загрузи index.html и этот файл\n3. Включи GitHub Pages в настройках');
+        }
+
+        function showBackupInfo() {
+            alert(`🚀 КАК РАЗМЕСТИТЬ НА GITHUB:
+
+1. Создай аккаунт на GitHub.com если нет
+2. Создай новый репозиторий с названием "fame-list"
+3. Скачай этот файл (index.html) на компьютер
+4. В репозитории нажми "Add file" → "Upload files"
+5. Загрузи index.html
+6. Перейди в Settings → Pages
+7. В "Source" выбери "main" branch
+8. Сохрани - сайт будет доступен по ссылке:
+   https://ТВОЙ_НИК.github.io/fame-list/
+
+⚠️ Все данные хранятся в localStorage браузера
+Для переноса данных между устройствами используй Экспорт/Импорт`);
+        }
+
+        // =================== ПАНЕЛИ УПРАВЛЕНИЯ ===================
+        function openDataPanel() {
+            document.getElementById('dataPanel').style.display = 'block';
+        }
+
+        function closeDataPanel() {
+            document.getElementById('dataPanel').style.display = 'none';
+        }
+
+        function openAdminPanel() {
+            const pass = prompt('Пароль админа (22518):');
+            if (pass === ADMIN_PASS) {
+                isAdmin = true;
+                document.getElementById('adminPanel').style.display = 'block';
+                updateAdminStatus();
+                loadAllProfiles(); // Перерисовываем с кнопками удаления
+                alert('👑 Добро пожаловать, босс!');
+            } else {
+                alert('❌ Неверный пароль!');
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('adminPanel').style.display = 'none';
+        }
+
+        function closeAllModals() {
+            document.getElementById('confirmDeleteModal').style.display = 'none';
+            document.getElementById('profileModal').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('dataPanel').style.display = 'none';
+        }
+
+        // =================== ОСТАЛЬНЫЕ ФУНКЦИИ ===================
+        function getFameLabel(type) {
+            const labels = {
+                'creator': 'СОЗДАТЕЛЬ', 'high': 'ВЫСОКИЙ ФЕЙМ',
+                'medium': 'СРЕДНИЙ ФЕЙМ', 'low': 'МАЛЫЙ ФЕЙМ'
+            };
+            return labels[type];
+        }
+
+        function searchProfiles(query) {
+            const results = [...fameDB.creator, ...fameDB.high, ...fameDB.medium, ...fameDB.low]
+                .filter(p => p.nickname.toLowerCase().includes(query.toLowerCase()) || 
+                            (p.description && p.description.toLowerCase().includes(query.toLowerCase())));
+            
+            ['creator', 'high', 'medium', 'low'].forEach(type => {
+                const container = document.getElementById(`${type}-cards`);
+                container.innerHTML = '';
+                
+                results.filter(p => p.type === type).forEach(person => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="avatar-section">
+                            <img src="${person.avatar || getDefaultAvatar(type)}" class="avatar" alt="Аватар">
+                            ${isAdmin ? `<button class="delete-avatar-btn" onclick="showDeleteConfirm('${person.id}', '${person.type}', '${person.nickname}')">×</button>` : ''}
+                            <div class="nickname">${person.nickname}</div>
+                        </div>
+                        <div class="fame-badge">${getFameLabel(person.type)}</div>
+                        <div class="description">${person.description || 'Без описания'}</div>
+                    `;
+                    card.onclick = () => openProfile(person, person.type);
+                    container.appendChild(card);
+                });
+            });
+        }
+
+        function openProfile(person, type) {
+            const fameColors = {
+                'creator': '#ff0000', 'high': '#ff9900',
+                'medium': '#ffff00', 'low': '#00ff00'
+            };
+            
+            const content = document.getElementById('profileContent');
+            content.innerHTML = `
+                <button class="profile-close" onclick="closeProfile()">✕</button>
+                <div class="profile-header">
+                    <div class="profile-avatar-container">
+                        <img src="${person.avatar || getDefaultAvatar(type)}" 
+                             class="profile-avatar" 
+                             style="border-color: ${fameColors[type]}">
+                        ${isAdmin ? `<button class="profile-delete-btn" onclick="showDeleteConfirm('${person.id}', '${type}', '${person.nickname}')">×</button>` : ''}
+                    </div>
+                    <div class="profile-info">
+                        <h1>${person.nickname}</h1>
+                        <div class="profile-fame" style="background: ${fameColors[type]}; color: ${type === 'high' ? 'black' : 'white'}">
+                            ${getFameLabel(type)}
+                        </div>
+                        <div style="color: #aaa;">ID: ${person.id}</div>
+                    </div>
+                </div>
+                <div class="profile-details">
+                    <div class="detail-card"><div class="detail-title">📝 ОПИСАНИЕ</div><div class="detail-content">${person.description || 'Нет описания'}</div></div>
+                    <div class="detail-card"><div class="detail-title">🔗 ПРОЕКТ</div><div class="detail-content">${person.project ? `<a href="${person.project}" target="_blank" class="project-link">${person.project}</a>` : 'Нет проекта'}</div></div>
+                    <div class="detail-card"><div class="detail-title">📅 В КОМЬЮНИТИ С</div><div class="detail-content">${person.year ? `Год ${person.year}` : 'Не указано'}</div></div>
+                </div>
+            `;
+            document.getElementById('profileModal').style.display = 'flex';
+        }
+
+        function closeProfile() {
+            document.getElementById('profileModal').style.display = 'none';
+        }
+
+        function previewAvatar(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                avatarBase64 = e.target.result;
+                const preview = document.getElementById('avatarPreview');
+                preview.style.display = 'block';
+                preview.style.backgroundImage = `url(${avatarBase64})`;
+                preview.style.backgroundSize = 'cover';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function addToFameList() {
+            if (!isAdmin) return alert('Только для админа!');
+            
+            const nickname = document.getElementById('nickname').value.trim();
+            const type = document.getElementById('fameType').value;
+            const description = document.getElementById('description').value.trim();
+            const project = document.getElementById('project').value.trim();
+            const year = document.getElementById('year').value;
+
+            if (!nickname) return alert('Введи ник!');
+            
+            const newPerson = {
+                id: `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                nickname, type, description: description || 'Без описания',
+                project: project || null, year: year || null,
+                avatar: avatarBase64 || getDefaultAvatar(type),
+                createdAt: new Date().toISOString()
+            };
+
+            fameDB[type].push(newPerson);
+            localStorage.setItem('fameDB', JSON.stringify(fameDB));
+            
+            // Очистка формы
+            document.getElementById('nickname').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('project').value = '';
+            document.getElementById('year').value = '';
+            document.getElementById('avatarPreview').style.display = 'none';
+            avatarBase64 = '';
+            
+            renderCategory(type);
+            alert(`✅ ${nickname} добавлен в ${getFameLabel(type)}!`);
+        }
+
+        function loginAsGuest() {
+            isAdmin = false;
+            updateAdminStatus();
+            loadAllProfiles();
+            alert('👤 Режим гостя: только просмотр');
+        }
+
+        // =================== ЗАГРУЗКА ПРИ ЗАПУСКЕ ===================
+        window.onload = init;
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeAllModals();
+        });
+    </script>
+</body>
+</html>
